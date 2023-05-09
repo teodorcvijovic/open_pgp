@@ -1,4 +1,4 @@
-from PrivateKey import PrivateKey
+from asymmetric_encryption.PrivateKey import PrivateKey
 
 
 class PrivateKeyRing:
@@ -6,14 +6,14 @@ class PrivateKeyRing:
     def __init__(self):
         self.keys = []
 
-    def save_key(self, public_key, private_key, email, passphrase, algo):
-        pk = PrivateKey(public_key, private_key, email, passphrase, algo)
+    def save_key(self, public_key, private_key, username, email, passphrase, algo):
+        pk = PrivateKey(public_key, private_key, username, email, passphrase, algo)
         self.keys.append(pk)
 
-    def save_key_exisiting(self, private_key: PrivateKey):
+    def save_key_existing(self, private_key: PrivateKey):
         self.keys.append(private_key)
 
-    def get_key_by_key_id(self, key_id):
+    def get_key_by_key_id(self, key_id) -> PrivateKey:
         if key_id == 0 and len(self.keys) > 0:
             return self.keys[0]
 
@@ -23,7 +23,7 @@ class PrivateKeyRing:
 
         return None
 
-    def get_keys_by_user_id(self, user_id):
+    def get_keys_by_user_id(self, user_id) -> list[PrivateKey]:
         user_id_keys = []
         for key in self.keys:
             if key.user_id == user_id:
@@ -31,7 +31,7 @@ class PrivateKeyRing:
 
         return user_id_keys
 
-    def get_all_keys(self):
+    def get_all_keys(self) -> list[PrivateKey]:
         return self.keys
 
     def delete_key_pair(self, key_id):
@@ -41,7 +41,8 @@ class PrivateKeyRing:
                 temp = key
                 break
 
-        if temp != None:
+        if temp:
             self.keys.remove(temp)
+
 
 privateKeyRing = PrivateKeyRing()

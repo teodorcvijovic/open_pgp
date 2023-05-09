@@ -1,26 +1,28 @@
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric import rsa, dsa, padding
+from cryptography.hazmat.primitives import hashes
 from Crypto.PublicKey import ElGamal
 from Crypto import Random
-from cryptography.hazmat.primitives import hashes
 from Crypto.Util.Padding import pad, unpad
 from Crypto.Cipher import PKCS1_OAEP
 
 from GlobalVariables import globalVariables
+from asymmetric_encryption.PrivateKey import PrivateKey
+from asymmetric_encryption.PublicKey import PublicKey
 
 
-class AsymmetricAlgorithms:
+class AsymmetricEncryption:
 
     @classmethod
-    def asymmetric_key_generate(cls, name, mail, algorithm, key_length):
+    def asymmetric_key_generate(cls, algorithm, key_length):
         if algorithm == globalVariables.RSA:
-            private_key = rsa.generate_private_key(
+            rsa_private_key = rsa.generate_private_key(
                 public_exponent=65537,
                 key_size=key_length
             )
-            public_key = private_key.public_key()
+            rsa_public_key = rsa_private_key.public_key()
 
-            return public_key, private_key
+            return rsa_public_key, rsa_private_key
 
         elif algorithm == globalVariables.DSA:
             dsa_private_key = dsa.generate_private_key(key_size=key_length)
@@ -30,15 +32,14 @@ class AsymmetricAlgorithms:
 
         elif algorithm == globalVariables.ElGamal:
             rand = Random.new().read
-            elgamal_key = ElGamal.generate(key_length, rand)
 
-            elgamal_private_key = elgamal_key
-            elgamal_public_key = elgamal_key.publickey()
+            elgamal_private_key = ElGamal.generate(key_length, rand)
+            elgamal_public_key = elgamal_private_key.publickey()
 
             return elgamal_public_key, elgamal_private_key
 
     @classmethod
-    def encrypt_with_public_key(cls, public_key, data):
+    def encrypt_with_public_key(cls, public_key: PublicKey, data):
         algorithm = public_key.derived_from_algorithm
         encrypted_data = None
 
@@ -54,11 +55,14 @@ class AsymmetricAlgorithms:
         elif algorithm == globalVariables.ElGamal:
             cipher = PKCS1_OAEP.new(public_key.public_key)
             encrypted_data = cipher.encrypt(pad(data, 256))
+        elif algorithm == globalVariables.DSA:
+            # we use DSA only for signature
+            pass
 
         return encrypted_data
 
     @classmethod
-    def decrypt_with_private_key(cls, private_key, encrypted_data, passphrase):
+    def decrypt_with_private_key(cls, private_key: PrivateKey, encrypted_data, passphrase):
         algorithm = private_key.derived_from_algorithm
         decrypted_private_key = private_key.get_private_key(passphrase)
         data = None
@@ -75,11 +79,14 @@ class AsymmetricAlgorithms:
         elif algorithm == globalVariables.ElGamal:
             cipher = PKCS1_OAEP.new(decrypted_private_key)
             data = unpad(cipher.decrypt(encrypted_data), 256)
+        elif algorithm == globalVariables.DSA:
+            # we use DSA only for signature
+            pass
 
         return data
 
     @classmethod
-    def sign_with_private_key(cls, private_key, data, passphrase):
+    def sign_with_private_key(cls, private_key: PrivateKey, data, passphrase):
         algorithm = private_key.derived_from_algorithm
         decrypted_private_key = private_key.get_private_key(passphrase)
         signature = None
@@ -98,11 +105,14 @@ class AsymmetricAlgorithms:
                 data,
                 hashes.SHA256()
             )
+        elif algorithm == globalVariables.ElGamal:
+            # we use ElGamal only for encryption
+            pass
 
         return signature
 
     @classmethod
-    def verify_signature(cls, public_key, signature, hash):
+    def verify_signature(cls, public_key: PublicKey, signature, hash):
         algorithm = public_key.derived_from_algorithm
 
         if algorithm == globalVariables.RSA:
@@ -117,7 +127,7 @@ class AsymmetricAlgorithms:
             return received_hash == hash
         elif algorithm == globalVariables.DSA:
             try:
-                public_key.verify(
+                public_key.public_key.verify(
                     signature,
                     hash,
                     hashes.SHA256()
@@ -125,3 +135,6 @@ class AsymmetricAlgorithms:
                 return True
             except InvalidSignature:
                 return False
+        elif algorithm == globalVariables.ElGamal:
+            # we use ElGamal only for encryption
+            pass

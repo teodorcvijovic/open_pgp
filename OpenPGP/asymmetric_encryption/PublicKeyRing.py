@@ -1,4 +1,4 @@
-from PublicKey import PublicKey
+from asymmetric_encryption.PublicKey import PublicKey
 
 
 class PublicKeyRing:
@@ -6,8 +6,8 @@ class PublicKeyRing:
     def __init__(self):
         self.keys = []
 
-    def save_key(self, public_key, email, algo):
-        pk = PublicKey(public_key, email, algo)
+    def save_key(self, public_key, username, email, algo):
+        pk = PublicKey(public_key, username, email, algo)
         self.keys.append(pk)
 
     def get_key_by_key_id(self, key_id):
