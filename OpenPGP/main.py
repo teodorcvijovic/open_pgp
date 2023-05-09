@@ -30,11 +30,19 @@ if __name__ == "__main__":
 
     #msg.encrypt(algo, 13708595535030583297)
 
+    # msg.send(
+    #     path='',
+    #     my_private_key_id=None,
+    #     encryptionAlgorithm=algo, recipient_public_key_id=13708595535030583297,
+    #     zip_message=True,
+    #     convert_to_radix64=False
+    # )
+
     msg.send(
         path='',
         my_private_key_id=None,
         encryptionAlgorithm=algo, recipient_public_key_id=13708595535030583297,
-        zip_message=False,
+        zip_message=True,
         convert_to_radix64=True
     )
 
@@ -42,7 +50,6 @@ if __name__ == "__main__":
         path='',
         filename='abc.txt',
         encryptionAlgorithm=algo,
-        my_public_key_id=13708595535030583297,
         passphrase='abcd'
     ).data)
 

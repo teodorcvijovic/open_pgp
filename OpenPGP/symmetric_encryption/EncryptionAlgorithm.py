@@ -26,11 +26,10 @@ class EncryptionAlgorithm:
         pass
 
     # template method
-    def encrypt(self, message_string, recipient_public_key_id):
+    def encrypt(self, message_bytes, recipient_public_key_id):
         # prepare input
         session_key = self.generate_session_key()
         # message_bytes = message_string.encode('utf-8')
-        message_bytes = message_string
         algorithm = self.get_algorithm(session_key)
 
         padder = padding.PKCS7(algorithm.block_size).padder()
@@ -60,7 +59,8 @@ class EncryptionAlgorithm:
         unpadder = padding.PKCS7(algorithm.block_size).unpadder()
         unpadded_data_bytes = unpadder.update(decrypted_data) + unpadder.finalize()
 
-        return unpadded_data_bytes.decode('utf-8')
+        #return unpadded_data_bytes.decode('utf-8')
+        return unpadded_data_bytes
 
     def encrypt_session_key(self, session_key, recipient_public_key_id):
         public_key = publicKeyRing.get_key_by_key_id(recipient_public_key_id)

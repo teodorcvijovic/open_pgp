@@ -1,12 +1,13 @@
 import ast
 import base64
 import datetime
+import gzip
 import io
 import zipfile
+import zlib
 
 from symmetric_encryption.EncryptionAlgorithm import EncryptionAlgorithm
 
-# TO DO
 class Message:
 
     def __init__(self, filename, data):
@@ -49,11 +50,7 @@ class Message:
 
         # compress message
         if zip_message:
-            compressed_buffer = io.BytesIO()
-            with zipfile.ZipFile(compressed_buffer, mode='w', compression=zipfile.ZIP_DEFLATED) as my_zip:
-                my_zip.writestr('my_compressed_string.txt', message_for_sending.encode('utf-8'))
-            # compressed bytes
-            message_for_sending = compressed_buffer.getvalue()
+            message_for_sending = gzip.compress(message_for_sending.encode('utf-8'))
         else:
             message_for_sending = message_for_sending.encode('utf-8')
 
@@ -61,10 +58,12 @@ class Message:
         encrypt = encryptionAlgorithm and recipient_public_key_id
         if encrypt:
             encrypted_data, encrypted_session_key = encryptionAlgorithm.encrypt(
-                message_string=message_for_sending,
+                message_bytes=message_for_sending,
                 recipient_public_key_id=recipient_public_key_id
             )
-            message_for_sending = str(encrypted_session_key) + '\n' + str(encrypted_data)
+            message_for_sending = str(recipient_public_key_id) + '\n' + str(encrypted_session_key) + '\n' + str(encrypted_data)
+        else:
+            message_for_sending = str(message_for_sending)
 
         # radix64 conversion
         if convert_to_radix64:
@@ -93,7 +92,6 @@ class Message:
             path,
             filename,
             encryptionAlgorithm: EncryptionAlgorithm,
-            my_public_key_id,  # needed to decrypt session key
             passphrase  # needed to access private key required for session key decryption
     ):
         with open(path + filename, "r") as file:
@@ -108,7 +106,8 @@ class Message:
 
         if is_encrypted:
             # decrypt
-            encrypted_session_key, data = data.split('\n', maxsplit=1)
+            my_public_key_id, encrypted_session_key, data = data.split('\n', maxsplit=2)
+            my_public_key_id = int(my_public_key_id)
             # zato sto smo u fajl upisivali "b'NIZ_BAJTOVA'" moramo da kovertujemo ovaj string u pravi NIZ_BAJTOVA
             encrypted_session_key = bytes(ast.literal_eval(encrypted_session_key))
             data = bytes(ast.literal_eval(data))
@@ -118,15 +117,13 @@ class Message:
                 passphrase
             )
             data = encryptionAlgorithm.decrypt(session_key, data)
+        else:
+            data = bytes(ast.literal_eval(data))
 
         if is_compressed:
-            # decompress
-            data = bytes(ast.literal_eval(data))
-            compressed_buffer = io.BytesIO(data)
-            with zipfile.ZipFile(compressed_buffer, mode='r') as my_zip:
-                # read the compressed file data as bytes
-                decompressed_data = my_zip.read('my_compressed_string.txt')
-            data = decompressed_data.decode('utf-8')
+            data = gzip.decompress(data).decode('utf-8')
+        else:
+            data = data.decode('utf-8')
 
         if is_signed:
             # verify signature
