@@ -34,6 +34,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.publicKeyRingTable.setHorizontalHeaderLabels(
             ['Timestamp', 'Key ID', 'Username', 'Email', 'Public Key', 'Algorithm', '', ''])
 
+        self.privateKeyToShow = None
+
     def generate_keys(self):
         globalVariables.name = self.Name.toPlainText()
         globalVariables.email = self.Email.toPlainText()
@@ -49,7 +51,8 @@ class Window(QMainWindow, Ui_MainWindow):
         public_key_path = self.publicKeyImportPath.toPlainText()
         passphrase = self.passphraseImportField.toPlainText()
 
-        if not private_key_path or not public_key_path or not passphrase or len(private_key_path) == 0 or len(public_key_path) == 0 or len(passphrase) == 0:
+        if not private_key_path or not public_key_path or not passphrase or len(private_key_path) == 0 or len(
+                public_key_path) == 0 or len(passphrase) == 0:
             self.privateKeyRingError.setText('Fill out all fields required for key import!')
             return
 
@@ -76,6 +79,17 @@ class Window(QMainWindow, Ui_MainWindow):
     def passphraseDialogOpen(self):
         dialog = PassphraseDialog(self)
         dialog.exec()
+
+    def showPrivateKeyDialogOpen(self):
+        button = self.sender()
+        row = self.privateKeyRingTable.indexAt(button.pos()).row()
+        key_id_item = self.privateKeyRingTable.item(row, 1)
+        key_id = int(key_id_item.text())
+        self.privateKeyToShow = privateKeyRing.get_key_by_key_id(key_id)
+
+        dialog = ShowPrivateKeyDialog(self)
+        dialog.exec()
+        self.privateKeyToShow = None
 
     def deletePrivateKeyButtonClicked(self):
         button = self.sender()
@@ -159,11 +173,10 @@ class Window(QMainWindow, Ui_MainWindow):
             button.clicked.connect(self.exportPrivateKeyButtonClicked)
 
             # show private key button
-            # button = QtWidgets.QPushButton(self.privateKeyRingTable)
-            # button.setText('Show private key')
-            # self.privateKeyRingTable.setCellWidget(row, 8, button)
-            # button.clicked.connect(self.showPrivateKeyDialogOpen)
-
+            button = QtWidgets.QPushButton(self.privateKeyRingTable)
+            button.setText('Show private key')
+            self.privateKeyRingTable.setCellWidget(row, 9, button)
+            button.clicked.connect(self.showPrivateKeyDialogOpen)
 
     def populate_public_key_table(self):
         self.publicKeyRingTable.setRowCount(len(publicKeyRing.keys))
@@ -198,6 +211,35 @@ class Window(QMainWindow, Ui_MainWindow):
             button.setText('Export')
             self.publicKeyRingTable.setCellWidget(row, 7, button)
             button.clicked.connect(self.exportPublicKeyButtonClicked)
+
+
+class ShowPrivateKeyDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        loadUi("ui/ShowPrivateKeyDialog.ui", self)
+        self.showPrivateKeyDialogOK.clicked.connect(self.on_OK)
+        self.showPrivateKeyDialogCancel.clicked.connect(self.on_Cancel)
+
+    def on_OK(self):
+        passphrase = self.showPrivateKeyDialogPassphrase.toPlainText()
+        try:
+            decrypted_private_key = self.parent().privateKeyToShow.get_private_key(passphrase)
+
+            private_key_bytes = decrypted_private_key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.BestAvailableEncryption(passphrase.encode('utf-8'))
+            )
+
+            private_key_hex = binascii.hexlify(private_key_bytes).decode('utf-8')
+
+            self.showPrivateKeyDialogPrivateKey.setPlainText(private_key_hex)
+        except PassphraseNotValid:
+            self.showPrivateKeyDialogPrivateKey.setPlainText('Access denied: Invalid passphrase')
+
+    def on_Cancel(self):
+        self.parent().privateKeyToShow = None
+        self.close()
 
 
 class PassphraseDialog(QDialog):
