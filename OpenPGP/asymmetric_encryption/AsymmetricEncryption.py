@@ -1,3 +1,5 @@
+from Crypto.Hash import SHA256
+from Crypto.Signature import PKCS1_v1_5
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric import rsa, dsa, padding
 from cryptography.hazmat.primitives import hashes
@@ -92,14 +94,21 @@ class AsymmetricEncryption:
         signature = None
 
         if algorithm == globalVariables.RSA:
-            signature = decrypted_private_key.encrypt(
+            signature = private_key.get_private_key(passphrase).sign(
                 data,
-                padding.OAEP(
-                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                    algorithm=hashes.SHA256(),
-                    label=None
-                )
+                padding.PKCS1v15(),
+                hashes.SHA1()
             )
+            return signature
+
+            # signature = decrypted_private_key.encrypt(
+            #     data,
+            #     padding.OAEP(
+            #         mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            #         algorithm=hashes.SHA256(),
+            #         label=None
+            #     )
+            # )
         elif algorithm == globalVariables.DSA:
             signature = decrypted_private_key.sign(
                 data,
@@ -116,15 +125,17 @@ class AsymmetricEncryption:
         algorithm = public_key.derived_from_algorithm
 
         if algorithm == globalVariables.RSA:
-            received_hash = public_key.public_key.decrypt(
-                signature,
-                padding.OAEP(
-                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                    algorithm=hashes.SHA256(),
-                    label=None
+            try:
+                public_key.public_key.verify(
+                    signature,
+                    hash,
+                    padding.PKCS1v15(),
+                    hashes.SHA1()
                 )
-            )
-            return received_hash == hash
+                return True
+            except Exception:
+                return False
+
         elif algorithm == globalVariables.DSA:
             try:
                 public_key.public_key.verify(

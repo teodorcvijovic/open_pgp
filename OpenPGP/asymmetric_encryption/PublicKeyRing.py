@@ -10,6 +10,9 @@ class PublicKeyRing:
         pk = PublicKey(public_key, username, email, algo)
         self.keys.append(pk)
 
+    def add_key(self, public_key):
+        self.keys.append(public_key)
+
     def get_key_by_key_id(self, key_id):
         if key_id == 0 and len(self.keys) > 0:
             return self.keys[0]
