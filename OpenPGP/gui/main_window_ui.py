@@ -150,7 +150,7 @@ class Ui_MainWindow(object):
         self.actionGenerate_new_keypair.setObjectName("actionGenerate_new_keypair")
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(3)
+        self.tabWidget.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
