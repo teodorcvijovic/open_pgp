@@ -42,9 +42,15 @@ class Window(QMainWindow, Ui_MainWindow):
     def generate_keys(self):
         globalVariables.name = self.Name.toPlainText()
         globalVariables.email = self.Email.toPlainText()
+        if not self.AsymmetricAlgoGroup.checkedButton() or not self.KeySizeGroup.checkedButton():
+            self.ErrorMsg.setText('Invalid input!')
+            return
+
         globalVariables.set_algoChecked(self.AsymmetricAlgoGroup.checkedButton().text())
         globalVariables.set_keySizeChecked(self.KeySizeGroup.checkedButton().text())
-        if globalVariables.email and globalVariables.name and globalVariables.algoChecked and globalVariables.keySizeChecked:  # Check if the text is not empty and a radio button is selected
+
+        # check if the text is not empty and a radio button is selected
+        if globalVariables.email and globalVariables.name and globalVariables.algoChecked and globalVariables.keySizeChecked:
             self.passphraseDialogOpen()
         else:
             self.ErrorMsg.setText('Fill out all fields!')
