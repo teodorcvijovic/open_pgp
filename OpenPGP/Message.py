@@ -3,12 +3,18 @@ import base64
 import datetime
 import gzip
 
+from GlobalVariables import globalVariables
 from asymmetric_encryption.AsymmetricEncryption import AsymmetricEncryption
 from asymmetric_encryption.PrivateKeyRing import privateKeyRing
 from asymmetric_encryption.PublicKeyRing import publicKeyRing
 from exceptions.InvalidSignature import InvalidSignature
+from exceptions.UnsupportedSymmetricAlgorithm import UnsupportedSymmetricAlgorithm
+from symmetric_encryption.AES128Encryption import AES128Encryption
 from symmetric_encryption.EncryptionAlgorithm import EncryptionAlgorithm
 from cryptography.hazmat.primitives import hashes
+
+from symmetric_encryption.TripleDESEncryption import TripleDESEncryption
+
 
 class Message:
 
@@ -84,7 +90,7 @@ class Message:
                 message_bytes=message_for_sending,
                 recipient_public_key_id=recipient_public_key_id
             )
-            message_for_sending = str(recipient_public_key_id) + '\n' + str(encrypted_session_key) + '\n' + str(encrypted_data)
+            message_for_sending = str(encryptionAlgorithm.algorithm_code()) + '\n' + str(recipient_public_key_id) + '\n' + str(encrypted_session_key) + '\n' + str(encrypted_data)
         else:
             message_for_sending = str(message_for_sending)
 
@@ -114,7 +120,7 @@ class Message:
             cls,
             path,
             filename,
-            encryptionAlgorithm: EncryptionAlgorithm,
+            # encryptionAlgorithm: EncryptionAlgorithm,
             passphrase  # needed to access private key required for session key decryption
     ):
         with open(path + filename, "r") as file:
@@ -129,8 +135,18 @@ class Message:
 
         if is_encrypted:
             # decrypt
-            my_public_key_id, encrypted_session_key, data = data.split('\n', maxsplit=2)
+            algo_code_string, my_public_key_id, encrypted_session_key, data = data.split('\n', maxsplit=3)
+
             my_public_key_id = int(my_public_key_id)
+
+            algo_code = int(algo_code_string)
+            if algo_code == globalVariables.TripleDES:
+                encryptionAlgorithm = TripleDESEncryption()
+            elif algo_code == globalVariables.AES128:
+                encryptionAlgorithm = AES128Encryption()
+            else:
+                raise UnsupportedSymmetricAlgorithm()
+
             # zato sto smo u fajl upisivali "b'NIZ_BAJTOVA'" moramo da kovertujemo ovaj string u pravi NIZ_BAJTOVA
             encrypted_session_key = bytes(ast.literal_eval(encrypted_session_key))
             data = bytes(ast.literal_eval(data))
