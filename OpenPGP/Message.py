@@ -54,12 +54,14 @@ class Message:
 
             signature_timestamp = datetime.datetime.now()
 
+            # hash message + timestamp
             hasher = hashes.Hash(hashes.SHA1())
             hasher.update((message_for_sending + str(signature_timestamp)).encode('utf-8'))
             hashed_message = hasher.finalize()
 
             leading_two_bytes = hashed_message[:2]
 
+            # encrypt the hash with private key
             signature = AsymmetricEncryption.sign_with_private_key(
                 private_key=privateKeyRing.get_key_by_key_id(my_private_key_id),
                 data=hashed_message,
@@ -154,6 +156,7 @@ class Message:
             signature_timestamp, senders_key_id, leading_two_octets_from_message, signature, data = data.split('\n', 4)
             senders_key_id = int(senders_key_id)
 
+            # hash message + received timestamp
             hasher = hashes.Hash(hashes.SHA1())
             hasher.update((data + str(signature_timestamp)).encode('utf-8'))
             hashed_message = hasher.finalize()
@@ -166,6 +169,7 @@ class Message:
             if leading_two_octets != leading_two_octets_from_message:
                 raise InvalidSignature()
 
+            # check if our hash matches the decrypted hash (that we got by decrypting with senders public key)
             senders_key = publicKeyRing.get_key_by_key_id(senders_key_id)
             signature_is_valid = AsymmetricEncryption.verify_signature(
                 public_key=senders_key,
