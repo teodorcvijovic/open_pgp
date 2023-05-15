@@ -2,9 +2,6 @@ import ast
 import base64
 import datetime
 import gzip
-import io
-import zipfile
-import zlib
 
 from asymmetric_encryption.AsymmetricEncryption import AsymmetricEncryption
 from asymmetric_encryption.PrivateKeyRing import privateKeyRing
