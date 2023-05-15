@@ -21,7 +21,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tab1">
        <attribute name="title">
@@ -219,7 +219,7 @@
           <x>10</x>
           <y>170</y>
           <width>751</width>
-          <height>331</height>
+          <height>341</height>
          </rect>
         </property>
         <property name="rowCount">
@@ -365,10 +365,10 @@
        <widget class="QTableWidget" name="publicKeyRingTable">
         <property name="geometry">
          <rect>
-          <x>0</x>
-          <y>180</y>
+          <x>10</x>
+          <y>120</y>
           <width>751</width>
-          <height>331</height>
+          <height>391</height>
          </rect>
         </property>
         <property name="rowCount">
@@ -393,13 +393,13 @@
        <attribute name="title">
         <string>Send Message</string>
        </attribute>
-       <widget class="QPlainTextEdit" name="plainTextEdit">
+       <widget class="QPlainTextEdit" name="messageContentTextBox">
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>40</y>
-          <width>651</width>
-          <height>87</height>
+          <y>90</y>
+          <width>751</width>
+          <height>91</height>
          </rect>
         </property>
        </widget>
@@ -407,13 +407,227 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>20</y>
-          <width>55</width>
+          <y>70</y>
+          <width>111</width>
           <height>16</height>
          </rect>
         </property>
         <property name="text">
-         <string>Message</string>
+         <string>Message Content</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="zipCheckbox">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>290</y>
+          <width>201</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Compress the message (ZIP)</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="radix64Checkbox">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>480</y>
+          <width>261</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Convert data to radix-64 format</string>
+        </property>
+       </widget>
+       <widget class="QRadioButton" name="select3DES">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>360</y>
+          <width>95</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>3DES</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">SymmetricAlgoGroup</string>
+        </attribute>
+       </widget>
+       <widget class="QRadioButton" name="selectAES128">
+        <property name="geometry">
+         <rect>
+          <x>80</x>
+          <y>360</y>
+          <width>95</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>AES128</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">SymmetricAlgoGroup</string>
+        </attribute>
+       </widget>
+       <widget class="QLabel" name="label_9">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>340</y>
+          <width>251</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Select symmetric encryption algorithm:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_11">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>390</y>
+          <width>351</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Recipients Public Key ID used for encrypting the session key</string>
+        </property>
+       </widget>
+       <widget class="QRadioButton" name="doNotEncrypt">
+        <property name="geometry">
+         <rect>
+          <x>160</x>
+          <y>360</y>
+          <width>141</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Do not encrypt</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">SymmetricAlgoGroup</string>
+        </attribute>
+       </widget>
+       <widget class="QLabel" name="label_12">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>200</y>
+          <width>431</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Private Key ID used for signature (leave empty if you do not want to sign)</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_13">
+        <property name="geometry">
+         <rect>
+          <x>450</x>
+          <y>310</y>
+          <width>271</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Enter the path where message will be saved:</string>
+        </property>
+       </widget>
+       <widget class="QPlainTextEdit" name="pathTextBox">
+        <property name="geometry">
+         <rect>
+          <x>450</x>
+          <y>340</y>
+          <width>261</width>
+          <height>31</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="sendMessageButton">
+        <property name="geometry">
+         <rect>
+          <x>510</x>
+          <y>430</y>
+          <width>131</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Send Message</string>
+        </property>
+       </widget>
+       <widget class="QPlainTextEdit" name="privateKeyTextBox">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>220</y>
+          <width>271</width>
+          <height>31</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QPlainTextEdit" name="publicKeyTextbox">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>410</y>
+          <width>271</width>
+          <height>31</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_14">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>20</y>
+          <width>111</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Filename</string>
+        </property>
+       </widget>
+       <widget class="QPlainTextEdit" name="messageTitle">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>40</y>
+          <width>261</width>
+          <height>31</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="errorLabel">
+        <property name="geometry">
+         <rect>
+          <x>450</x>
+          <y>380</y>
+          <width>281</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </widget>
@@ -438,5 +652,6 @@
  <buttongroups>
   <buttongroup name="KeySizeGroup"/>
   <buttongroup name="AsymmetricAlgoGroup"/>
+  <buttongroup name="SymmetricAlgoGroup"/>
  </buttongroups>
 </ui>

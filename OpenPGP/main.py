@@ -10,6 +10,7 @@ from PyQt5.uic import loadUi
 from PyQt5 import QtWidgets, QtGui
 
 from GlobalVariables import globalVariables
+from Message import Message
 from asymmetric_encryption.AsymmetricEncryption import AsymmetricEncryption
 from asymmetric_encryption.PrivateKey import PrivateKey
 from asymmetric_encryption.PrivateKeyRing import privateKeyRing
@@ -19,6 +20,8 @@ from asymmetric_encryption.PublicKeyRing import publicKeyRing
 from exceptions.PassphraseNotValid import PassphraseNotValid
 
 from gui.main_window_ui import Ui_MainWindow
+from symmetric_encryption.AES128Encryption import AES128Encryption
+from symmetric_encryption.TripleDESEncryption import TripleDESEncryption
 
 
 class Window(QMainWindow, Ui_MainWindow):
@@ -28,6 +31,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.GenerateButton.clicked.connect(self.generate_keys)
         self.importPrivateKeyButton.clicked.connect(self.import_private_key)
         self.importPublicKeyButton.clicked.connect(self.import_public_key)
+        self.sendMessageButton.clicked.connect(self.send_message_button_clicked)
 
         self.privateKeyRingTable.setColumnCount(10)
         self.privateKeyRingTable.setHorizontalHeaderLabels(
@@ -38,6 +42,9 @@ class Window(QMainWindow, Ui_MainWindow):
             ['Timestamp', 'Key ID', 'Username', 'Email', 'Public Key', 'Algorithm', '', ''])
 
         self.privateKeyToShow = None
+
+        self.passphrase = ''
+
 
     def generate_keys(self):
         globalVariables.name = self.Name.toPlainText()
@@ -84,6 +91,10 @@ class Window(QMainWindow, Ui_MainWindow):
 
         self.populate_public_key_table()
         self.publicKeyRingError.setText('')
+
+    def enterPassphraseSendMessageDialogOpen(self):
+        dialog = EnterPassphraseSendMessage(self)
+        dialog.exec()
 
     def passphraseDialogOpen(self):
         dialog = PassphraseDialog(self)
@@ -220,6 +231,65 @@ class Window(QMainWindow, Ui_MainWindow):
             button.setText('Export')
             self.publicKeyRingTable.setCellWidget(row, 7, button)
             button.clicked.connect(self.exportPublicKeyButtonClicked)
+
+    def send_message_button_clicked(self):
+        filename = self.messageTitle.toPlainText()
+        data = self.messageContentTextBox.toPlainText()
+
+        message = Message(filename=filename, data=data)
+
+        path = self.pathTextBox.toPlainText()
+        my_private_key_id = self.privateKeyTextBox.toPlainText()
+        if my_private_key_id:
+            my_private_key_id = int(my_private_key_id)
+        zip_message = self.zipCheckbox.isChecked()
+        symmetric_algo = self.SymmetricAlgoGroup.checkedButton().text()
+
+        encryptionAlgorithm = None
+        if symmetric_algo == '3DES':
+            encryptionAlgorithm = TripleDESEncryption()
+        elif symmetric_algo == 'AES128':
+            encryptionAlgorithm = AES128Encryption()
+
+        recipient_public_key_id = self.publicKeyTextbox.toPlainText()
+        if recipient_public_key_id:
+            recipient_public_key_id = int(recipient_public_key_id)
+        convert_to_radix64 = self.radix64Checkbox.isChecked()
+
+        if my_private_key_id:
+            # enter passphrase to sign the message with private key
+            self.enterPassphraseSendMessageDialogOpen()
+
+        try:
+            message.send(
+                path=path,
+                my_private_key_id=my_private_key_id,
+                passphrase=self.passphrase,
+                encryptionAlgorithm=encryptionAlgorithm,
+                recipient_public_key_id=recipient_public_key_id,
+                zip_message=zip_message,
+                convert_to_radix64=convert_to_radix64,
+            )
+            self.errorLabel.setText('Message is sent!')
+        except PassphraseNotValid:
+            self.errorLabel.setText('Invalid passphrase!\nMessage cannot be sent!')
+
+        self.passphrase = ''
+
+class EnterPassphraseSendMessage(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        loadUi("ui/EnterPassphraseSendMessage.ui", self)
+        self.okButton.clicked.connect(self.on_OK)
+        self.cancelButton.clicked.connect(self.on_Cancel)
+
+    def on_OK(self):
+        passphrase = self.passphraseTextBox.toPlainText()
+        self.parent().passphrase = passphrase
+        self.close()
+
+    def on_Cancel(self):
+        self.close()
 
 class ShowPrivateKeyDialog(QDialog):
     def __init__(self, parent=None):
