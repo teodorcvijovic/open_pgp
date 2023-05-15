@@ -1,12 +1,13 @@
 import binascii
 import sys
 
+from cryptography.hazmat.primitives import serialization
+
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QMainWindow, QTableWidgetItem
 )
 from PyQt5.uic import loadUi
 from PyQt5 import QtWidgets, QtGui
-from cryptography.hazmat.primitives import serialization
 
 from GlobalVariables import globalVariables
 from asymmetric_encryption.AsymmetricEncryption import AsymmetricEncryption
@@ -14,7 +15,9 @@ from asymmetric_encryption.PrivateKey import PrivateKey
 from asymmetric_encryption.PrivateKeyRing import privateKeyRing
 from asymmetric_encryption.PublicKey import PublicKey
 from asymmetric_encryption.PublicKeyRing import publicKeyRing
+
 from exceptions.PassphraseNotValid import PassphraseNotValid
+
 from gui.main_window_ui import Ui_MainWindow
 
 
@@ -212,7 +215,6 @@ class Window(QMainWindow, Ui_MainWindow):
             self.publicKeyRingTable.setCellWidget(row, 7, button)
             button.clicked.connect(self.exportPublicKeyButtonClicked)
 
-
 class ShowPrivateKeyDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -240,7 +242,6 @@ class ShowPrivateKeyDialog(QDialog):
     def on_Cancel(self):
         self.parent().privateKeyToShow = None
         self.close()
-
 
 class PassphraseDialog(QDialog):
     def __init__(self, parent=None):
