@@ -197,6 +197,15 @@ class Ui_MainWindow(object):
         self.tabWidget.addTab(self.tab4, "")
         self.tab5 = QtWidgets.QWidget()
         self.tab5.setObjectName("tab5")
+        self.label_15 = QtWidgets.QLabel(self.tab5)
+        self.label_15.setGeometry(QtCore.QRect(10, 30, 271, 16))
+        self.label_15.setObjectName("label_15")
+        self.loadMessageButton = QtWidgets.QPushButton(self.tab5)
+        self.loadMessageButton.setGeometry(QtCore.QRect(630, 50, 131, 31))
+        self.loadMessageButton.setObjectName("loadMessageButton")
+        self.receiveMessagePath = QtWidgets.QPlainTextEdit(self.tab5)
+        self.receiveMessagePath.setGeometry(QtCore.QRect(10, 50, 611, 31))
+        self.receiveMessagePath.setObjectName("receiveMessagePath")
         self.tabWidget.addTab(self.tab5, "")
         self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -207,7 +216,7 @@ class Ui_MainWindow(object):
         self.actionGenerate_new_keypair.setObjectName("actionGenerate_new_keypair")
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(3)
+        self.tabWidget.setCurrentIndex(4)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -245,5 +254,7 @@ class Ui_MainWindow(object):
         self.sendMessageButton.setText(_translate("MainWindow", "Send Message"))
         self.label_14.setText(_translate("MainWindow", "Filename"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab4), _translate("MainWindow", "Send Message"))
+        self.label_15.setText(_translate("MainWindow", "Message file path:"))
+        self.loadMessageButton.setText(_translate("MainWindow", "Load Message"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab5), _translate("MainWindow", "Receive Message"))
         self.actionGenerate_new_keypair.setText(_translate("MainWindow", "Generate new keypair"))

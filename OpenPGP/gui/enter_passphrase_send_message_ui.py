@@ -25,7 +25,7 @@ class Ui_enterPassphraseSendMessage(object):
         self.passphraseTextBox.setGeometry(QtCore.QRect(130, 80, 321, 31))
         self.passphraseTextBox.setObjectName("passphraseTextBox")
         self.label = QtWidgets.QLabel(enterPassphraseSendMessage)
-        self.label.setGeometry(QtCore.QRect(180, 50, 331, 20))
+        self.label.setGeometry(QtCore.QRect(140, 50, 331, 20))
         self.label.setObjectName("label")
 
         self.retranslateUi(enterPassphraseSendMessage)
@@ -36,4 +36,4 @@ class Ui_enterPassphraseSendMessage(object):
         enterPassphraseSendMessage.setWindowTitle(_translate("enterPassphraseSendMessage", "Dialog"))
         self.cancelButton.setText(_translate("enterPassphraseSendMessage", "Cancel"))
         self.okButton.setText(_translate("enterPassphraseSendMessage", "OK"))
-        self.label.setText(_translate("enterPassphraseSendMessage", "Enter passphrase to sign the message:"))
+        self.label.setText(_translate("enterPassphraseSendMessage", "Enter passphrase to sign the message before sending:"))

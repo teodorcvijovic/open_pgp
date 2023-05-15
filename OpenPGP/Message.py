@@ -119,11 +119,11 @@ class Message:
     def receive(
             cls,
             path,
-            filename,
+            # filename,
             # encryptionAlgorithm: EncryptionAlgorithm,
             passphrase  # needed to access private key required for session key decryption
     ):
-        with open(path + filename, "r") as file:
+        with open(path, "r") as file:
             received_message = file.read()
 
         code_string, data = received_message.split('\n', maxsplit=1)
