@@ -126,6 +126,8 @@ class Message:
         with open(path, "r") as file:
             received_message = file.read()
 
+        filename = path.rsplit('/', 1)[-1]
+
         code_string, data = received_message.split('\n', maxsplit=1)
         is_signed, is_compressed, is_encrypted, is_converted_to_radix64 = cls.decode_operations(code_string)
 
