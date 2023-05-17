@@ -671,6 +671,19 @@
          </rect>
         </property>
        </widget>
+       <widget class="QLabel" name="errorMsgReceive">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>90</y>
+          <width>471</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
       </widget>
      </widget>
     </item>
@@ -687,7 +700,7 @@
  <connections/>
  <buttongroups>
   <buttongroup name="KeySizeGroup"/>
-  <buttongroup name="AsymmetricAlgoGroup"/>
   <buttongroup name="SymmetricAlgoGroup"/>
+  <buttongroup name="AsymmetricAlgoGroup"/>
  </buttongroups>
 </ui>

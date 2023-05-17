@@ -16,8 +16,10 @@ from asymmetric_encryption.PrivateKey import PrivateKey
 from asymmetric_encryption.PrivateKeyRing import privateKeyRing
 from asymmetric_encryption.PublicKey import PublicKey
 from asymmetric_encryption.PublicKeyRing import publicKeyRing
+from exceptions.InvalidSignature import InvalidSignature
 
 from exceptions.PassphraseNotValid import PassphraseNotValid
+from exceptions.UnsupportedSymmetricAlgorithm import UnsupportedSymmetricAlgorithm
 
 from gui.main_window_ui import Ui_MainWindow
 from symmetric_encryption.AES128Encryption import AES128Encryption
@@ -32,6 +34,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.importPrivateKeyButton.clicked.connect(self.import_private_key)
         self.importPublicKeyButton.clicked.connect(self.import_public_key)
         self.sendMessageButton.clicked.connect(self.send_message_button_clicked)
+        self.loadMessageButton.clicked.connect(self.receive_message_button_clicked)
 
         self.privateKeyRingTable.setColumnCount(10)
         self.privateKeyRingTable.setHorizontalHeaderLabels(
@@ -42,8 +45,8 @@ class Window(QMainWindow, Ui_MainWindow):
             ['Timestamp', 'Key ID', 'Username', 'Email', 'Public Key', 'Algorithm', '', ''])
 
         self.privateKeyToShow = None
-
         self.passphrase = ''
+        self.message = None
 
 
     def generate_keys(self):
@@ -275,6 +278,70 @@ class Window(QMainWindow, Ui_MainWindow):
             self.errorLabel.setText('Invalid passphrase!\nMessage cannot be sent!')
 
         self.passphrase = ''
+
+    def receive_message_button_clicked(self):
+        try:
+            path = self.receiveMessagePath.toPlainText()
+            if Message.passphrase_is_required_for_session_key_decryption(path):
+                dialog = EnterPassphraseReceiveMessage(self)
+                dialog.exec()
+
+            self.message = Message.receive(
+                path=path,
+                passphrase=self.passphrase
+            )
+
+            dialog = MessageDialog(self)
+            dialog.exec()
+
+            self.message = None
+
+        except FileNotFoundError:
+            self.errorMsgReceive.setText('File is not found!')
+        except InvalidSignature:
+            self.errorMsgReceive.setText('Invalid signature!')
+        except UnsupportedSymmetricAlgorithm:
+            self. self.errorMsgReceive.setText('Unsupported symmetric algorithm!')
+        except PassphraseNotValid:
+            self. self.errorMsgReceive.setText('Passphrase is not valid!')
+        # TO DO: add case for invalid decryption
+
+        self.passphrase = ''
+
+class MessageDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        loadUi("ui/MessageDialog.ui", self)
+        self.saveMessageButton.clicked.connect(self.on_OK)
+        self.cancelButton.clicked.connect(self.on_Cancel)
+
+        self.filenameTextBox.setPlainText(self.parent().message.filename)
+        self.messageContentTextBox.setPlainText(self.parent().message.data)
+
+    def on_OK(self):
+        filename = self.filenameTextBox.toPlainText()
+        data = self.messageContentTextBox.toPlainText()
+        path = self.pathTextBox.toPlainText()
+
+        with open(path + filename, "w") as file:
+            file.write(data)
+
+        self.msg.setText('Message is saved!')
+
+    def on_Cancel(self):
+        self.close()
+
+class EnterPassphraseReceiveMessage(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        loadUi("ui/PassphraseDialog.ui", self)
+        self.OKBox.accepted.connect(self.on_accepted)
+
+    def on_accepted(self):
+        self.parent().passphrase = self.PassphraseText.toPlainText()
+
+    def on_canceled(self):
+        self.close()
 
 class EnterPassphraseSendMessage(QDialog):
     def __init__(self, parent=None):

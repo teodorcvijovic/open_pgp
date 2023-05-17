@@ -114,6 +114,15 @@ class Message:
 
         return message_for_sending
 
+    @classmethod
+    def passphrase_is_required_for_session_key_decryption(cls, path):
+        with open(path, "r") as file:
+            received_message = file.read()
+
+        code_string, data = received_message.split('\n', maxsplit=1)
+        is_signed, is_compressed, is_encrypted, is_converted_to_radix64 = cls.decode_operations(code_string)
+        return is_encrypted
+
     # receives the message and return a Message object
     @classmethod
     def receive(
@@ -126,7 +135,7 @@ class Message:
         with open(path, "r") as file:
             received_message = file.read()
 
-        filename = path.rsplit('/', 1)[-1]
+        filename = path.rsplit('\\', 1)[-1]
 
         code_string, data = received_message.split('\n', maxsplit=1)
         is_signed, is_compressed, is_encrypted, is_converted_to_radix64 = cls.decode_operations(code_string)
