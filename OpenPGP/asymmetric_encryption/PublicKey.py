@@ -5,6 +5,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 
 from GlobalVariables import globalVariables
+from asymmetric_encryption.PrivateKey import PrivateKey
 
 
 class PublicKey:
@@ -17,10 +18,7 @@ class PublicKey:
         self.derived_from_algorithm = derived_from_algorithm
 
         # calculating key id
-        public_key_hex = binascii.hexlify(public_key.public_bytes(
-            encoding=serialization.Encoding.DER,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
-        )).decode('utf-8')
+        public_key_hex = PrivateKey.convert_public_key_to_hex(public_key, derived_from_algorithm)
 
         self.key_id = int(public_key_hex, 16) % (2 ** 64)
 
@@ -30,15 +28,12 @@ class PublicKey:
             content = file.read()
             algo, username, email, public_key_pem = content.split('#')
 
-            public_key = load_pem_public_key(public_key_pem.encode('utf-8'))
+            public_key = PrivateKey.load_public_key_from_pem(public_key_pem, int(algo))
 
         return PublicKey(public_key, username, email, int(algo))
 
     def save_public_key_to_pem(self):
-        public_key_pem = self.public_key.public_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
-        ).decode('utf-8')
+        public_key_pem = PrivateKey.convert_public_key_to_pem(public_key=self.public_key, derived_from_algorithm=self.derived_from_algorithm)
 
         # pay attention: format of .pem file
         file_data = str(self.derived_from_algorithm) + '#' + self.username + '#' + self.email + '#' + public_key_pem

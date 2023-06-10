@@ -1,4 +1,5 @@
 import binascii
+import hashlib
 import sys
 
 from cryptography.hazmat.primitives import serialization
@@ -161,11 +162,7 @@ class Window(QMainWindow, Ui_MainWindow):
     def populate_private_key_table(self):
         self.privateKeyRingTable.setRowCount(len(privateKeyRing.keys))
         for row, private_key in enumerate(privateKeyRing.keys):
-            public_key_hex = binascii.hexlify(private_key.public_key.public_bytes(
-                encoding=serialization.Encoding.DER,
-                format=serialization.PublicFormat.SubjectPublicKeyInfo
-            )).decode('utf-8')
-
+            public_key_hex = PrivateKey.convert_public_key_to_hex(private_key.public_key, private_key.derived_from_algorithm)
             encrypted_private_key_hex = binascii.hexlify(private_key.encrypted_private_key).decode('utf-8')
 
             row_data = [
@@ -204,10 +201,8 @@ class Window(QMainWindow, Ui_MainWindow):
     def populate_public_key_table(self):
         self.publicKeyRingTable.setRowCount(len(publicKeyRing.keys))
         for row, public_key in enumerate(publicKeyRing.keys):
-            public_key_hex = binascii.hexlify(public_key.public_key.public_bytes(
-                encoding=serialization.Encoding.DER,
-                format=serialization.PublicFormat.SubjectPublicKeyInfo
-            )).decode('utf-8')
+            public_key_hex = PrivateKey.convert_public_key_to_hex(public_key.public_key,
+                                                                            public_key.derived_from_algorithm)
 
             row_data = [
                 str(public_key.timestamp),
@@ -370,13 +365,7 @@ class ShowPrivateKeyDialog(QDialog):
         try:
             decrypted_private_key = self.parent().privateKeyToShow.get_private_key(passphrase)
 
-            private_key_bytes = decrypted_private_key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.PKCS8,
-                encryption_algorithm=serialization.BestAvailableEncryption(passphrase.encode('utf-8'))
-            )
-
-            private_key_hex = binascii.hexlify(private_key_bytes).decode('utf-8')
+            private_key_hex = PrivateKey.convert_private_key_to_hex(decrypted_private_key, self.parent().privateKeyToShow.derived_from_algorithm ,passphrase)
 
             self.showPrivateKeyDialogPrivateKey.setPlainText(private_key_hex)
         except PassphraseNotValid:

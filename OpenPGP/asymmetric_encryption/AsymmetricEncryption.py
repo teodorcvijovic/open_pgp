@@ -1,8 +1,11 @@
+import binascii
+import hashlib
+
 from Crypto.Hash import SHA256
 from Crypto.Signature import PKCS1_v1_5
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric import rsa, dsa, padding
-from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import hashes, serialization
 from Crypto.PublicKey import ElGamal
 from Crypto import Random
 from Crypto.Util.Padding import pad, unpad
