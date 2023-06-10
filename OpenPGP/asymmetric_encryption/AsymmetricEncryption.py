@@ -2,7 +2,9 @@ import binascii
 import hashlib
 
 from Crypto.Hash import SHA256
+from Crypto.Random import get_random_bytes
 from Crypto.Signature import PKCS1_v1_5
+from Crypto.Util.number import bytes_to_long, long_to_bytes
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric import rsa, dsa, padding
 from cryptography.hazmat.primitives import hashes, serialization
@@ -58,8 +60,18 @@ class AsymmetricEncryption:
                 )
             )
         elif algorithm == globalVariables.ElGamal:
-            cipher = PKCS1_OAEP.new(public_key.public_key)
-            encrypted_data = cipher.encrypt(pad(data, 256))
+            p = int(public_key.public_key.p)
+            g = int(public_key.public_key.g)
+            y = int(public_key.public_key.y)
+
+            k = bytes_to_long(get_random_bytes(32))
+            shared_secret = pow(y, k, p)
+            data_num = bytes_to_long(data)
+            ciphertext_part = pow(g, k, p)
+            shared_secret_part = (data_num * shared_secret) % p
+
+            encrypted_data = str(ciphertext_part) + '\n' + str(shared_secret_part)
+            encrypted_data = encrypted_data.encode('utf-8')
         elif algorithm == globalVariables.DSA:
             # we use DSA only for signature
             pass
@@ -82,8 +94,15 @@ class AsymmetricEncryption:
                 )
             )
         elif algorithm == globalVariables.ElGamal:
-            cipher = PKCS1_OAEP.new(decrypted_private_key)
-            data = unpad(cipher.decrypt(encrypted_data), 256)
+            p = int(private_key.public_key.p)
+            x = int(private_key.get_private_key(passphrase).x)
+            ciphertext_part, shared_secret_part = encrypted_data.decode('utf-8').split('\n')
+            ciphertext_part = int(ciphertext_part)
+            shared_secret_part = int(shared_secret_part)
+            shared_secret = pow(ciphertext_part, x, p)
+            data_num = (shared_secret_part * pow(shared_secret, -1, p)) % p
+            data = long_to_bytes(data_num)
+
         elif algorithm == globalVariables.DSA:
             # we use DSA only for signature
             pass

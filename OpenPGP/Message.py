@@ -100,7 +100,7 @@ class Message:
 
         # message header
         code_string: str = self.encode_operations(
-            sign=my_private_key_id is not None and passphrase is not None,
+            sign=my_private_key_id and passphrase,
             compress=zip_message,
             encrypt=encrypt,
             convert=convert_to_radix64
